@@ -6,6 +6,8 @@ maxNo = -1;
 minNo = 200;
 mxN = -1;
 mxArr = [];
+totalAll = 0;
+allTargets = [];
 
 class Permutatron {
   constructor(numbers, target) {
@@ -54,7 +56,7 @@ class Permutatron {
         result
       }
       if(allowed){
-        let str = this.numbers.toString()
+        /*let str = this.numbers.toString()
         results[str].arr.push(obj)
         let f = results[str].targets.indexOf(result);
         if(f!=-1){
@@ -63,6 +65,12 @@ class Permutatron {
         if(result > 100){
           this.extra.push(result)
         }
+        */
+        let rpn = pattern.toString();
+        if (result<100 ) {
+          allTargets[result].rpns.push(rpn);
+        }
+
       }
 
     }
@@ -80,63 +88,129 @@ class Permutatron {
     return this.found
   }
 
-  allCombination(){
+
+  all(){
     let arr = []
+    allTargets = [];
+    for (var i = 0; i<100; i++) {
+      allTargets.push({
+        rpns:[]
+      })
+    }
+    totalAll=0;
+    var t0 = performance.now();
+    for(var i1=1;i1<=4;i1++){
+    //  arr.push(i1);
+      for(var i2=1;i2<=6;i2++){
+        if (i1 != i2) {
+          for(var i3=1;i3<=8;i3++){
+            if (i3!=i2 && i3!=i1) {
+              for (var i4 = 1; i4 <= 12 ; i4++) {
+                if (i4!=i3 && i4!=i2 && i4!=i1) {
+                  for (var i5 = 1; i5 <= 20; i5++) {
+                    if (i5!=i4 && i5!=i3 && i5!=i2 && i5!=i1) {
+                      arr = [i1,i2,i3,i4,i5];
 
-    for(let i1=1;i1<=4;i1++){
-      arr.push(i1)
-      for(let i2=1;i2<=6;i2++){
-        let ct2 = arr.filter(x => x==i2).length
-        if(ct2<1){
-          arr.push(i2)
-          for(let i3=1;i3<=8;i3++){
-
-            let ct3 = arr.filter(x => x==i3).length
-            if(ct3<1){
-              arr.push(i3)
-              for(let i4=1;i4<=12;i4++){
-                let ct4 = arr.filter(x => x==i4).length
-                if(ct4<1){
-                  arr.push(i4)
-                  for(let i5=1;i5<=20;i5++){
-                    let ct5 = arr.filter(x => x==i5).length
-
-                    if(ct5<1){
-                      arr.push(i5)
                       this.numbers = arr;
-                      let str = this.numbers.toString()
-                      results[str] = {
-                        arr:[],
-                        targets: []
-                      };
-                      this.target = 20;
-                      for(let i=1;i<100;i++){
-                        results[str].targets.push(i);
-                      }
                       this.find();
-                      if(results[str].targets.length > mxN){
-                        mxN = results[str].targets.length
-                        mxArr = [...results[str].targets]
-                      }
-                      /*if(results[str].length < minNo){
-                        minNo = results[str].length
-                      }*/
+                      totalAll+=1;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    var t1 = performance.now();
+    console.log(t1-t0 + "msecs");
+  }
+
+  withpairs(){
+    allTargets = [];
+    for (var i = 0; i<100; i++) {
+      allTargets.push({
+        rpns:[]
+      })
+    }
+    var arr=[]
+    totalAll=0;
+
+    var t0 = performance.now();
+    for(var i1=1;i1<=4;i1++){
+      var map = {};
+    //  arr.push(i1);
+    map[i1] = 1;
+      for(var i2=1;i2<=6;i2++){
+        var exist = i2 in map
+        var t2 =  false;
+        if (!exist) {
+          t2 = true;
+          map[i2] = 1;
+        }
+        else if (map[i2]==1) {
+          map[i2]++;
+          t2 = true;
+        }
+        if (t2) {
+          for(var i3=1;i3<=8;i3++){
+            var exist = i3 in map
+            var t3 =  false;
+            if (!exist) {
+              t3 = true;
+              map[i3] = 1;
+            }
+            else if (map[i3]==1) {
+              map[i3]++;
+              t3 = true;
+            }
+            if (t3) {
+              for (var i4 = 1; i4 <= 12 ; i4++) {
+                var exist = i4 in map
+                var t4 =  false;
+                if (!exist) {
+                  t4 = true;
+                  map[i4] = 1;
+                }
+                else if (map[i4]==1) {
+                  map[i4]++;
+                  t4 = true;
+                }
+                if (t4) {
+                  for (var i5 = 1; i5 <= 20; i5++) {
+                    var exist = i5 in map
+                    var t5 =  false;
+                    if (!exist) {
+                      t5 = true;
+                      map[i5] = 1;
+                    }
+                    else if (map[i5]==1) {
+                      map[i5]++;
+                      t5 = true;
+                    }
+                    if (t5) {
+                      arr = [i1,i2,i3,i4,i5];
+
+                      this.numbers = arr;
+                      this.find();
+                      totalAll+=1;
+                      delete map[i5];
                     }
 
                   }
+                  delete map[i4];
                 }
-
-
-
               }
+              delete map[i3];
             }
-
-
           }
+          delete map[i2];
         }
-
       }
     }
+    var t1 = performance.now();
+    console.log(t1-t0 + "msecs");
   }
 
   targetsgen(){
@@ -146,25 +220,6 @@ class Permutatron {
     }
   }
 
-  f(){
-    for(let i1=1;i1<=4;i1++){
-      for(let i2=1;i2<=6;i2++){
-        for(let i3=1;i3<=8;i3++){
-          for(let i4=1;i4<=12;i4++){
-            for(let i5=1;i5<=20;i5++){
-              const arr = [i1,i2,i3,i4,i5]
-              let str = arr.toString()
-              if(mx > results[str].targets.length){
-                mx = results[str].targets.length
-                 mxArr = results[str].targets
-              }
-            }
-
-          }
-        }
-      }
-    }
-  }
 
 }
 
