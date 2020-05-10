@@ -9,6 +9,7 @@ mxArr = [];
 totalAll = 0;
 allTargets = [];
 mapAll={};
+genmap = {};
 
 class Permutatron {
   constructor(numbers, target) {
@@ -57,7 +58,7 @@ class Permutatron {
         result
       }
       if(allowed){
-        let str = this.numbers.toString()
+        let str = this.numbers.concat().sort().join(',')
         /*results[str].arr.push(obj)
         let f = results[str].targets.indexOf(result);
         if(f!=-1){
@@ -93,6 +94,7 @@ class Permutatron {
   }
 
   initMap(){
+    mapAll = {}
     for(var i1=1;i1<=4;i1++){
     //  arr.push(i1);
       for(var i2=1;i2<=6;i2++){
@@ -104,11 +106,12 @@ class Permutatron {
                   for (var i5 = 1; i5 <= 20; i5++) {
                     if (i5!=i4 && i5!=i3 && i5!=i2 && i5!=i1) {
                       let tmpArr = [i1,i2,i3,i4,i5];
-                      let str = tmpArr.toString()
-                      mapAll[str]=[];
-                      for (var i = 0; i < 100; i++) {
-
-                        mapAll[str].push(0);
+                      let str = tmpArr.sort().join(',')
+                      if (!(str in mapAll)) {
+                        mapAll[str]=[];
+                        for (var i = 0; i < 100; i++) {
+                          mapAll[str].push(0);
+                        }
                       }
 
                     }
@@ -123,6 +126,129 @@ class Permutatron {
 
   }
 
+  initMapFall(){
+    mapAll = {}
+    for(var i1=1;i1<=4;i1++){
+      for (var i2 = 1; i2 <= 6; i2++) {
+        for (var i3 = 1; i3 <= 8; i3++) {
+          for (var i4 = 1; i4 <= 12; i4++) {
+            for (var i5 = 1; i5 <= 20; i5++) {
+              let tmpArr = [i1,i2,i3,i4,i5];
+              let str = tmpArr.sort().join(',')
+              if (!(str in mapAll)) {
+                mapAll[str]=[];
+                for (var i = 0; i < 100; i++) {
+                  mapAll[str].push(0);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  initMapPair(){
+    mapAll = {}
+    for(var i1=1;i1<=4;i1++){
+      var map = {};
+    //  arr.push(i1);
+      map[i1] = 1;
+      for(var i2=1;i2<=6;i2++){
+        var exist = i2 in map
+        var t2 =  false;
+        if (!exist) {
+          t2 = true;
+          map[i2] = 1;
+        }
+        else if (map[i2]==1) {
+          map[i2]++;
+          t2 = true;
+        }
+        if (t2) {
+          for(var i3=1;i3<=8;i3++){
+            var exist = i3 in map
+            var t3 =  false;
+            if (!exist) {
+              t3 = true;
+              map[i3] = 1;
+            }
+            else if (map[i3]==1) {
+              map[i3]++;
+              t3 = true;
+            }
+            if (t3) {
+              for (var i4 = 1; i4 <= 12 ; i4++) {
+                var exist = i4 in map
+                var t4 =  false;
+                if (!exist) {
+                  t4 = true;
+                  map[i4] = 1;
+                }
+                else if (map[i4]==1) {
+                  map[i4]++;
+                  t4 = true;
+                }
+                if (t4) {
+                  for (var i5 = 1; i5 <= 20; i5++) {
+                    var exist = i5 in map
+                    var t5 =  false;
+                    if (!exist) {
+                      t5 = true;
+                      map[i5] = 1;
+                    }
+                    else if (map[i5]==1) {
+                      map[i5]++;
+                      t5 = true;
+                    }
+                    if (t5) {
+                      let tmpArr = [i1,i2,i3,i4,i5];
+                      let str = tmpArr.sort().join(',')
+                      if (!(str in mapAll)) {
+                        mapAll[str]=[];
+                        for (var i = 0; i < 100; i++) {
+                          mapAll[str].push(0);
+                        }
+                      }
+                      if (map[i5]==1) {
+                        delete map[i5];
+                      }
+                      else {
+                        map[i5]--;
+                      }
+
+                    }
+
+                  }
+                  if (map[i4]==1) {
+                    delete map[i4];
+                  }
+                  else {
+                    map[i4]--;
+                  }
+                }
+              }
+              if (map[i3]==1) {
+                delete map[i3];
+              }
+              else {
+                map[i3]--;
+              }
+            }
+          }
+          if (map[i2]==1) {
+            delete map[i2];
+          }
+          else {
+            map[i2]--;
+          }
+        }
+      }
+    }
+  }
+
+
+
   all(){
     let arr = []
     allTargets = [];
@@ -132,6 +258,7 @@ class Permutatron {
       })
     }
     totalAll=0;
+    genmap={}
     var t0 = performance.now();
     for(var i1=1;i1<=4;i1++){
     //  arr.push(i1);
@@ -144,10 +271,13 @@ class Permutatron {
                   for (var i5 = 1; i5 <= 20; i5++) {
                     if (i5!=i4 && i5!=i3 && i5!=i2 && i5!=i1) {
                       arr = [i1,i2,i3,i4,i5];
-
-                      this.numbers = arr;
-                      this.find();
-                      totalAll+=1;
+                      let str = arr.sort().join(',')
+                      if (!(str in genmap)) {
+                        genmap[str]=1;
+                        this.numbers = arr;
+                        this.find();
+                        totalAll+=1;
+                      }
                     }
                   }
                 }
@@ -170,12 +300,12 @@ class Permutatron {
     }
     var arr=[]
     totalAll=0;
-
+    genmap={}
     var t0 = performance.now();
     for(var i1=1;i1<=4;i1++){
       var map = {};
     //  arr.push(i1);
-    map[i1] = 1;
+      map[i1] = 1;
       for(var i2=1;i2<=6;i2++){
         var exist = i2 in map
         var t2 =  false;
@@ -225,21 +355,45 @@ class Permutatron {
                     }
                     if (t5) {
                       arr = [i1,i2,i3,i4,i5];
+                      let str = arr.sort().join(',')
+                      if (!(str in genmap)) {
+                        genmap[str]=1;
+                        this.numbers = arr;
+                        this.find();
+                        totalAll+=1;
+                      }
+                      if (map[i5]==1) {
+                        delete map[i5];
+                      }
+                      else {
+                        map[i5]--;
+                      }
 
-                      this.numbers = arr;
-                      this.find();
-                      totalAll+=1;
-                      delete map[i5];
                     }
 
                   }
-                  delete map[i4];
+                  if (map[i4]==1) {
+                    delete map[i4];
+                  }
+                  else {
+                    map[i4]--;
+                  }
                 }
               }
-              delete map[i3];
+              if (map[i3]==1) {
+                delete map[i3];
+              }
+              else {
+                map[i3]--;
+              }
             }
           }
-          delete map[i2];
+          if (map[i2]==1) {
+            delete map[i2];
+          }
+          else {
+            map[i2]--;
+          }
         }
       }
     }
@@ -249,6 +403,7 @@ class Permutatron {
 
   fall(){
     let arr = []
+    genmap={}
     allTargets = [];
     for (var i = 0; i<100; i++) {
       allTargets.push({
@@ -263,9 +418,13 @@ class Permutatron {
           for (var i4 = 1; i4 <= 12; i4++) {
             for (var i5 = 1; i5 <= 20; i5++) {
               arr = [i1, i2, i3, i4, i5];
-              this.numbers = arr;
-              this.find();
-              totalAll += 1;
+              let str = arr.sort().join(',')
+              if (!(str in genmap)) {
+                genmap[str]=1;
+                this.numbers = arr;
+                this.find();
+                totalAll+=1;
+              }
             }
           }
         }
