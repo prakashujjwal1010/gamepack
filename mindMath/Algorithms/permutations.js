@@ -8,6 +8,7 @@ mxN = -1;
 mxArr = [];
 totalAll = 0;
 allTargets = [];
+mapAll={};
 
 class Permutatron {
   constructor(numbers, target) {
@@ -56,8 +57,8 @@ class Permutatron {
         result
       }
       if(allowed){
-        /*let str = this.numbers.toString()
-        results[str].arr.push(obj)
+        let str = this.numbers.toString()
+        /*results[str].arr.push(obj)
         let f = results[str].targets.indexOf(result);
         if(f!=-1){
           results[str].targets.splice(f,1);
@@ -68,7 +69,10 @@ class Permutatron {
         */
         let rpn = pattern.toString();
         if (result<100 ) {
-          allTargets[result].rpns.push(rpn);
+          if(mapAll[str][result]==0){
+            allTargets[result].rpns.push(rpn);
+            mapAll[str][result]=1;
+          }
         }
 
       }
@@ -88,6 +92,36 @@ class Permutatron {
     return this.found
   }
 
+  initMap(){
+    for(var i1=1;i1<=4;i1++){
+    //  arr.push(i1);
+      for(var i2=1;i2<=6;i2++){
+        if (i1 != i2) {
+          for(var i3=1;i3<=8;i3++){
+            if (i3!=i2 && i3!=i1) {
+              for (var i4 = 1; i4 <= 12 ; i4++) {
+                if (i4!=i3 && i4!=i2 && i4!=i1) {
+                  for (var i5 = 1; i5 <= 20; i5++) {
+                    if (i5!=i4 && i5!=i3 && i5!=i2 && i5!=i1) {
+                      let tmpArr = [i1,i2,i3,i4,i5];
+                      let str = tmpArr.toString()
+                      mapAll[str]=[];
+                      for (var i = 0; i < 100; i++) {
+
+                        mapAll[str].push(0);
+                      }
+
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+  }
 
   all(){
     let arr = []
@@ -211,6 +245,58 @@ class Permutatron {
     }
     var t1 = performance.now();
     console.log(t1-t0 + "msecs");
+  }
+
+  fall(){
+    let arr = []
+    allTargets = [];
+    for (var i = 0; i<100; i++) {
+      allTargets.push({
+        rpns:[]
+      })
+    }
+    totalAll=0;
+    var t0 = performance.now();
+    for(var i1=1;i1<=4;i1++){
+      for (var i2 = 1; i2 <= 6; i2++) {
+        for (var i3 = 1; i3 <= 8; i3++) {
+          for (var i4 = 1; i4 <= 12; i4++) {
+            for (var i5 = 1; i5 <= 20; i5++) {
+              arr = [i1, i2, i3, i4, i5];
+              this.numbers = arr;
+              this.find();
+              totalAll += 1;
+            }
+          }
+        }
+      }
+    }
+    var t1 = performance.now();
+    console.log(t1-t0 + "msecs");
+  }
+
+  download(){
+
+    const data = "";
+    /*for (var i = 0; i < allTargets.length; i++) {
+      data+=JSON.stringify(allTargets[i].rpns)
+    }*/
+    const textToBLOB = new Blob([JSON.stringify(allTargets)], { type: 'text/json' });
+        const sFileName = 'formData.json';	   // The file to save the data.
+
+        let newLink = document.createElement("a");
+        newLink.download = sFileName;
+
+        if (window.webkitURL != null) {
+            newLink.href = window.webkitURL.createObjectURL(textToBLOB);
+        }
+        else {
+            newLink.href = window.URL.createObjectURL(textToBLOB);
+            newLink.style.display = "none";
+            document.body.appendChild(newLink);
+        }
+
+        newLink.click();
   }
 
   targetsgen(){
