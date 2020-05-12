@@ -1,5 +1,5 @@
 //const evaluator = require('./countdown-RPN-evaluator')
-const OPERANDS = ['+', '*', '-', '/']
+const OPERANDS = [ "+","-","*","/"]
 
 results = {}
 maxNo = -1;
@@ -10,6 +10,35 @@ totalAll = 0;
 allTargets = [];
 mapAll={};
 genmap = {};
+repArr=[];
+ord =[]
+
+function score(pattern,writePos) {
+  scr = 0;
+  const distinct = (value, index, self) => {
+    return !(typeof value === 'number') && self.indexOf(value) == index && index < writePos;
+  }
+  const noOps = pattern.filter(distinct).length;
+  if (noOps == 4) {
+    return 18
+  }
+
+  for (var i = 0; i < writePos; i++) {
+    if (!(typeof pattern[i] === 'number')) {
+      if (pattern[i]=='+' || pattern[i]=='*' ) {
+        scr+=1;
+      }
+      else if (pattern[i]=='-') {
+        scr+=2
+      }
+      else if (pattern[i]=='/') {
+        scr+=3
+      }
+
+    }
+  }
+  return scr;
+}
 
 class Permutatron {
   constructor(numbers, target) {
@@ -69,6 +98,7 @@ class Permutatron {
         }
         */
         let rpn = pattern.toString();
+
         if (result<100 ) {
           if(mapAll[str][result]==0){
             allTargets[result].rpns.push(rpn);
@@ -92,6 +122,126 @@ class Permutatron {
     this.iterate(pattern, this.numbers, 0, 0)
     return this.found
   }
+
+  findAll() {
+    const pattern = new Array(2 * this.numbers.length - 1)
+    this.iterateAll(pattern, this.numbers, 0, 0)
+    return this.found
+  }
+
+
+  iterateAll(patter, remaining, writePos, unresolvedNumbers) {
+
+  /*  if (unresolvedNumbers > 1) {
+      for (let i=0; (i<OPERANDS.length && !this.found); i++) {
+
+        pattern[writePos] = OPERANDS[i]
+        const allowed = this.evaluate(pattern, writePos)
+
+        if (!this.found && allowed) {
+          this.iterateAll(pattern, remaining, writePos + 1, unresolvedNumbers - 1)
+        }
+      }
+    }
+
+
+  //  if(remaining.length == 0 ){
+      const {allowed, result} = evaluator(pattern, writePos);
+      let obj = {
+        pattern,
+        allowed,
+        result
+      }
+      if(allowed){
+        let str = this.numbers.concat().sort().join(',')
+        let rpn = pattern.toString();
+        repArr.push(rpn);
+
+        if (result<100 ) {
+          if(mapAll[str][result]==0){
+            allTargets[result].rpns = [rpn];
+            mapAll[str][result] = score(pattern);
+          }
+          else {
+            let scr = score(pattern)
+            if (scr > mapAll[str][result]) {
+              allTargets[result].rpns = [rpn]
+              mapAll[str][result] = scr;
+            }
+          }
+        }
+
+
+      }
+
+  //  }
+
+
+
+    for (let i=0; i<remaining.length && !this.found; i++) {
+      const remainingSubset = this.removeEntryFromArray(remaining, i)
+      pattern[writePos] = remaining[i]
+      this.iterateAll(pattern, remainingSubset, writePos + 1, unresolvedNumbers + 1)
+    }*/
+    let pattern = patter;
+    if (unresolvedNumbers > 1) {
+      for (let i=0; (i<OPERANDS.length && !this.found); i++) {
+        pattern[writePos] = OPERANDS[i]
+        const allowed = this.evaluate(pattern, writePos)
+        if (pattern.join(',').substr(0,15) == "1,1,/,1,/,1,+,1" && writePos == 8) {
+          console.log(allowed);
+          //console.log(pattern.join(','));
+        }
+
+      if (!this.found && allowed) {
+        this.iterateAll(pattern, remaining, writePos + 1, unresolvedNumbers - 1)
+      }
+    }
+  }
+
+        const {allowed, result} = evaluator(pattern, writePos);
+
+    //  if(remaining.length == 0 ){
+
+
+        if(allowed){
+          if (pattern.join(',') == "1,1,/,1,/,1,+,1,+") {
+            console.log("no");
+            console.log();
+
+          }
+          let str = this.numbers.concat().sort().join(',')
+          let rpn = pattern.toString();
+          repArr.push(rpn);
+
+          if (result<100 ) {
+
+            if(mapAll[str][result]==0){
+              allTargets[result].rpns = [rpn];
+              mapAll[str][result] = score(pattern,writePos);
+            }
+            else {
+              if (scr > mapAll[str][result]) {
+                let scr = score(pattern, writePos)
+                allTargets[result].rpns = [rpn]
+                mapAll[str][result] = scr;
+              }
+            }
+          }
+
+
+        }
+
+    //  }
+
+
+    for (let i=0; i<remaining.length && !this.found; i++) {
+      const remainingSubset = this.removeEntryFromArray(remaining, i)
+      pattern[writePos] = remaining[i]
+      this.iterateAll(pattern, remainingSubset, writePos + 1, unresolvedNumbers + 1)
+    }
+  }
+
 
   initMap(){
     mapAll = {}
@@ -275,7 +425,32 @@ class Permutatron {
                       if (!(str in genmap)) {
                         genmap[str]=1;
                         this.numbers = arr;
-                        this.find();
+                        this.findAll();
+                        var s1=0,s2=0;
+                        for (var i = 0; i < 100; i++) {
+                          if (mapAll[str][i]==1) {
+                            if (i<=69 && i>=10) {
+                              s1++
+                            }
+                            else if ((i<=99 && i>=70) || (i<10 && i>=1)) {
+                              s2++
+                            }
+                          }
+                        }
+                        if (s1==0) {
+                          console.log("no easy in "+str);
+                        }
+                        else {
+                          if (s1<minNo) {
+                            minNo = s1;
+                          }
+                          if (s1>maxNo) {
+                            maxNo=s1;
+                          }
+                        }
+                        if (s2==0) {
+                          console.log("no medium in "+str);
+                        }
                         totalAll+=1;
                       }
                     }
@@ -287,8 +462,104 @@ class Permutatron {
         }
       }
     }
+
     var t1 = performance.now();
     console.log(t1-t0 + "msecs");
+  }
+
+  one(){
+    allTargets = [];
+    for (var i = 0; i<100; i++) {
+      allTargets.push({
+        rpns:[]
+      })
+    }
+    var danger = [
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 2],
+      [1, 1, 1, 1, 3],
+      [1, 1, 1, 1, 4],
+      [1, 1, 1, 1, 5],
+      [1, 1, 1, 1, 6],
+      [1, 1, 1, 1, 7],
+      [1, 1, 1, 1, 8],
+      [1, 1, 1, 2, 2],
+      [1, 1, 1, 2, 3],
+      [1, 1, 1, 2, 4],
+      [1, 1, 1, 3, 3],
+      [1, 1, 2, 2, 2],
+      [1, 1, 2, 2, 3],
+      [1, 1, 2, 2, 4],
+      [1, 1, 2, 3, 3],
+      [1, 1, 10, 2, 3],
+      [1, 1, 10, 2, 4],
+      [1, 1, 3, 3, 3],
+      [1, 2, 2, 2, 2],
+      [1, 2, 2, 2, 3],
+      [1, 2, 2, 2, 4],
+      [1, 2, 2, 3, 3],
+      [1, 2, 3, 3, 3],
+      [1, 2, 3, 3, 4],
+      [1, 2, 3, 3, 5],
+      [1, 2, 3, 3, 6],
+      [1, 2, 3, 4, 4],
+      [1, 2, 3, 4, 5],
+      [1, 3, 3, 3, 3],
+      [1, 3, 4, 4, 4],
+      [1, 3, 4, 4, 5],
+      [2, 2, 2, 2, 2],
+      [2, 2, 2, 2, 3],
+      [2, 2, 2, 2, 4],
+      [2, 2, 2, 3, 3],
+      [10, 10, 2, 2, 2],
+      [11, 11, 2, 2, 2],
+      [2, 2, 3, 3, 3],
+      [10, 10, 2, 2, 3],
+      [11, 11, 2, 2, 3],
+      [10, 10, 2, 2, 4],
+      [11, 11, 2, 2, 4],
+      [2, 3, 3, 3, 3],
+      [10, 10, 2, 3, 3],
+      [11, 11, 2, 3, 3],
+      [3, 3, 3, 3, 3],
+      [10, 10, 3, 3, 3],
+      [11, 11, 3, 3, 3],
+      [12, 12, 3, 3, 3],
+    ];
+    for (var j = 0; j < 1; j++) {
+      var t0 = performance.now();
+      this.numbers = danger[j];
+      let str = this.numbers.sort().join(',')
+      this.findAll()
+      var t1 = performance.now();
+      console.log(t1-t0 + "msecs");
+      var s1=0,s2=0;
+      for (var i = 0; i < 100; i++) {
+        if (mapAll[str][i]!=0) {
+          if (i<=69 && i>=10) {
+            s1++
+          }
+          else if ((i<=99 && i>=70) || (i<10 && i>=1)) {
+            s2++
+          }
+        }
+      }
+      if (s1==0) {
+        console.log("no easy in "+str);
+      }
+      else {
+        if (s1<minNo) {
+          minNo = s1;
+        }
+        if (s1>maxNo) {
+          maxNo=s1;
+        }
+      }
+      if (s2==0) {
+        console.log("no medium in "+str);
+      }
+    }
+
   }
 
   withpairs(){
@@ -360,6 +631,32 @@ class Permutatron {
                         genmap[str]=1;
                         this.numbers = arr;
                         this.find();
+                        var s1=0,s2=0;
+                        for (var i = 0; i < 100; i++) {
+                          if (mapAll[str][i]==1) {
+                            if (i<=69 && i>=10) {
+                              s1++
+                            }
+                            else if ((i<=99 && i>=70) || (i<10 && i>=1)) {
+                              s2++
+                            }
+                          }
+                        }
+                        if (s1==0) {
+                          console.log("no easy in "+str);
+                        }
+                        else {
+                          if (s1<minNo) {
+                            minNo = s1;
+                          }
+                          if (s1>maxNo) {
+                            maxNo=s1;
+                          }
+                        }
+                        if (s2==0) {
+                          console.log("no medium in "+str);
+                        }
+
                         totalAll+=1;
                       }
                       if (map[i5]==1) {
@@ -423,6 +720,31 @@ class Permutatron {
                 genmap[str]=1;
                 this.numbers = arr;
                 this.find();
+                var s1=0,s2=0;
+                for (var i = 0; i < 100; i++) {
+                  if (mapAll[str][i]==1) {
+                    if (i<=69 && i>=10) {
+                      s1++
+                    }
+                    else if ((i<=99 && i>=70) || (i<10 && i>=1)) {
+                      s2++
+                    }
+                  }
+                }
+                if (s1==0) {
+                  console.log("no easy in "+str);
+                }
+                else {
+                  if (s1<minNo) {
+                    minNo = s1;
+                  }
+                  if (s1>maxNo) {
+                    maxNo=s1;
+                  }
+                }
+                if (s2==0) {
+                  console.log("no medium in "+str);
+                }
                 totalAll+=1;
               }
             }
@@ -433,6 +755,7 @@ class Permutatron {
     var t1 = performance.now();
     console.log(t1-t0 + "msecs");
   }
+
 
   download(){
 
