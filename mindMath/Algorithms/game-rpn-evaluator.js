@@ -37,5 +37,3 @@ function evaluator(symbols, last) {
     result: stack.pop()
   }
 }
-
-//module.exports = evaluator

@@ -1,81 +1,7 @@
 
-
-const allowedCheck = n => Number.isInteger(n) && n >= 0
-
-function calculate(stack, operand) {
-  const second = stack.pop()
-  const first = stack.pop()
-  switch(operand) {
-    case '+':
-      return first + second
-    case '*':
-      return first * second
-    case '-':
-      return first - second
-    case '/':
-      return first / second
-  }
-}
-
-function evaluator(symbols, last) {
-  const stack = []
-  const length = last ? last+1 : symbols.length
-  let allowed = true
-
-  for (let i=0; i<length; i++) {
-    const s = symbols[i]
-    if (typeof s === 'number') {
-      stack.push(s)
-    } else {
-      const result = calculate(stack, s)
-      allowed = allowedCheck(result)
-      if (!allowed) break;
-      stack.push(result)
-    }
-  }
-
-  return {
-    allowed,
-    result: stack.pop()
-  }
-}
-
-//module.exports = evaluator
-
-
-
 const OPERANDS = [ '+', '-','/', '*']
 var opLen = 4
 var found = false
-
-function score(pattern,writePos) {
-  var scr = 0;
-  map = {}
-  var flag = 0;
-  for (var i = 0; i <= writePos; i++) {
-    if (isNaN(pattern[i])) {
-      if(!(pattern[i] in map)){
-        map[pattern[i]] = 1;
-        flag++
-      }
-      if (pattern[i]=='+' || pattern[i]=='*' ) {
-        scr+=1;
-      }
-      else if (pattern[i]=='-') {
-        scr+=2
-      }
-      else if (pattern[i]=='/') {
-        scr+=3
-      }
-
-    }
-  }
-  if(flag == 4){
-    scr = 18
-  }
-  return scr;
-}
-
 
 function removeEntryFromArray(array, skipIndex) {
   const subset = new Array(array.length - 1)
@@ -144,10 +70,11 @@ function pushTarget(result) {
   if (result<=69 && result>=10) {
     targetsEz.push(result);
   }
-  else if ((result<=99 && result>=70) || (result<10 && result>=1)) {
+  if (result<100 && result>=1) {
     targetsMed.push(result);
   }
 }
+
 
 function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
   if (unresolvedNumbers > 1) {
@@ -168,7 +95,7 @@ function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
         flag = true;
       }
       if(result > 100 && hasTwo){
-        falg = false;
+        flag = false;
       }
 
       if (!found && allowed && flag && unique) {
@@ -185,12 +112,6 @@ function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
             pushTarget(result)
             target[result] = s
             best[result] = rpn
-          }
-          else{
-          /*  if(s > target[result]){
-              target[result] = s
-              best[result] = rpn
-            }*/
           }
 
         }
@@ -220,13 +141,54 @@ function find() {
   return found
 }
 
+function generateInputNumbers() {
+  var t = 5;
+  const upperRanges = [4,6,8,12,20];
+  var inputNumbers = [];
+  var noOfOnes = 0;
+  var noOfTwos = 0;
+  while(t--){
+    /*1, 1, 1, 1, 1
+    1, 1, 1, 1, 2
+    1, 1, 1, 1, 3
+    1, 1, 1, 1, 4
+    1, 1, 1, 1, 5
+    1, 1, 1, 2, 2
+    1, 1, 1, 2, 3
+    1, 1, 2, 2, 2
+    1, 2, 2, 2, 2
+    2, 2, 2, 2, 2  are invalid combinations so we will avoid thes*/
+
+
+    if ((noOfOnes == 1 && noOfTwos == 3) || (noOfOnes == 2 && noOfTwos == 2) || (noOfTwos == 4)) {
+      var min = 3;
+      var tmp = Math.floor(Math.random() * (upperRanges[t] + 1 - min) + min);
+      inputNumbers.push(tmp)
+    }
+    else  {
+      var min = 1;
+      var tmp = Math.floor(Math.random() * (upperRanges[t] + 1 - min) + min);
+      if (tmp == 1) {
+        noOfOnes++;
+      }
+      else if (tmp == 2) {
+        noOfTwos++;
+      }
+      inputNumbers.push(tmp)
+    }
+  }
+  return inputNumbers
+}
+
 function genEzQuestion() {
+  numbers = generateInputNumbers();
   find()
   var trgt = targetsEz[Math.floor(Math.random() * targetsEz.length)];
   console.log("easy: " + trgt);
   console.log(best[trgt])
 }
 function genMedQuestion() {
+  numbers = generateInputNumbers();
   find()
   var trgt = targetsMed[Math.floor(Math.random() * targetsMed.length)];
   console.log("medium: " + trgt);
