@@ -65,6 +65,7 @@ var best = new Array(100+1).join('0').split('').map(parseFloat);
 var uniq = {}
 var dups = false
 var compulsory = null;
+var numbers = [11,11,11,11,3]
 
 function pushTarget(result) {
   if (result<=69 && result>=10) {
@@ -195,12 +196,10 @@ function genMedQuestion() {
   console.log(best[trgt])
 }
 
-var numbers = [11,11,11,11,3]
 var t0 = performance.now();
 genEzQuestion();
 var t1 = performance.now();
 console.log(t1-t0 + " msecs");
-var numbers = [2,3,2,7,13]
 var t0 = performance.now();
 genMedQuestion();
 var t1 = performance.now();
