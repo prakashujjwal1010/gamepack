@@ -98,14 +98,17 @@ function gentips(pattern, remaining, writePos, unresolvedNumbers) {
 
 }
 
-function findTips(inputNumbers) {
+function findTips(inputNumbers, targetNum) {
   rpns = [];
   targetsEz = [];
   targetsMed = [];
+  //no need for found here but let it be
+  found = false;
   maxScore = 0;
   best = ""
   uniq = {}
   numbers = inputNumbers;
+  targetNumber = targetNum;
   dups = checkIfArrayHasDups(numbers)
   const pattern = new Array(2 * numbers.length)
   var t0 = performance.now();

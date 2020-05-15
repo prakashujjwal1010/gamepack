@@ -58,23 +58,13 @@ function checkIfArrayHasUniqueOps(pattern, writePos) {
 }
 
 var rpns = [];
-var targetsEz = [];
-var targetsMed = [];
-var target = new Array(100+1).join('0').split('').map(parseFloat);
-var best = new Array(100+1).join('0').split('').map(parseFloat);
+var level = 0;
+var skipQuestion = {}
+var target = null;
+var best = "";
 var uniq = {}
 var dups = false
-var compulsory = null;
 var numbers = [11,11,11,11,3]
-
-function pushTarget(result) {
-  if (result<=69 && result>=10) {
-    targetsEz.push(result);
-  }
-  if (result<100 && result>=1) {
-    targetsMed.push(result);
-  }
-}
 
 
 function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
@@ -100,22 +90,25 @@ function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
       }
 
       if (!found && allowed && flag && unique) {
-        if (compulsory != null) {
-          var comp = rpn.indexOf(compulsory);
-        }
-        else {
-          var comp = 1;
-        }
+        var str = numbers.sort().join();
+        if (skipQuestion[str] != result) {
+          if(result < 100 && writePos == 8){
+            if (result<=69 && result>=10 && level == 0) {
+              found = true;
+              target = result;
+              best = rpn;
+              skipQuestion[str] = result;
+            }
+            if (result<100 && result>=1 && level == 1) {
+              found = true;
+              target = result;
+              best = rpn;
+              skipQuestion[str] = result;
+            }
 
-        if(result < 100 && comp != -1 && writePos == 8){
-          var s = 13;
-          if(!target[result]){
-            pushTarget(result)
-            target[result] = s
-            best[result] = rpn
           }
-
         }
+
         genrpn(pattern, remaining, writePos + 1, unresolvedNumbers - 1)
       }
     }
@@ -131,15 +124,14 @@ function genrpn(pattern, remaining, writePos, unresolvedNumbers) {
 
 function find() {
   rpns = [];
-  targetsEz = [];
-  targetsMed = [];
-  target = new Array(100+1).join('0').split('').map(parseFloat);
-  best = new Array(100+1).join('0').split('').map(parseFloat);
+  found = false;
+  target = null;
+  best = "";
   uniq = {}
   dups = checkIfArrayHasDups(numbers)
   const pattern = new Array(2 * numbers.length)
   genrpn(pattern, numbers, 0, 0)
-  return found
+  return target
 }
 
 function generateInputNumbers() {
@@ -182,25 +174,26 @@ function generateInputNumbers() {
 }
 
 function genEzQuestion() {
+  var t0 = performance.now();
   numbers = generateInputNumbers();
+  level = 0;
   find()
-  var trgt = targetsEz[Math.floor(Math.random() * targetsEz.length)];
-  console.log("easy: " + trgt);
-  console.log(best[trgt])
+  var t1 = performance.now();
+  console.log(t1-t0 + " msecs");
+  console.log("easy: " + target);
+  console.log(best)
 }
 function genMedQuestion() {
+  var t0 = performance.now();
   numbers = generateInputNumbers();
+  level = 1;
   find()
-  var trgt = targetsMed[Math.floor(Math.random() * targetsMed.length)];
-  console.log("medium: " + trgt);
-  console.log(best[trgt])
+  var t1 = performance.now();
+  console.log(t1-t0 + " msecs");
+  console.log("medium: " + target);
+  console.log(best)
 }
 
-var t0 = performance.now();
+
 genEzQuestion();
-var t1 = performance.now();
-console.log(t1-t0 + " msecs");
-var t0 = performance.now();
 genMedQuestion();
-var t1 = performance.now();
-console.log(t1-t0 + " msecs");
