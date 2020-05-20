@@ -150,16 +150,15 @@ var TangramGame = {
         var center = squareTangram.tans[i].center();
         var floatPoints = [];
         for (var j = 0; j < points.length; j++) {
-          floatPoints.push((points[j].toFloatX() + 0)*this.scaleX + 100);
-          floatPoints.push((points[j].toFloatY() + 0)*this.scaleY + 100);
+          floatPoints.push((points[j].toFloatX() + 0)*this.scaleX + 60);
+          floatPoints.push((points[j].toFloatY() + 0)*this.scaleY + 60);
         }
 
 
-        tan.offsetX = (center.toFloatX() + 0)*this.scaleX + 100;
-        tan.offsetY = (center.toFloatY() + 0)*this.scaleY + 100;
+        tan.offsetX = (center.toFloatX() + 0)*this.scaleX + 60;
+        tan.offsetY = (center.toFloatY() + 0)*this.scaleY + 60;
         tan.x =  tan.offsetX;
         tan.y =  tan.offsetY;
-        console.log(tan.x + " , " + tan.y);
         tan.points = floatPoints;
         tans.push(tan);
       }
