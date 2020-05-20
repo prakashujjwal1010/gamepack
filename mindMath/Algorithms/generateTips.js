@@ -32,7 +32,7 @@ function score(pattern,writePos) {
     }
   }
   if(flag == 4){
-    scr = 18
+    scr = 13
   }
   return scr;
 }
@@ -83,6 +83,9 @@ function gentips(pattern, remaining, writePos, unresolvedNumbers) {
             maxScore = s
             best = rpn
           }
+          if (s == 13) {
+            found = true;
+          }
 
         }
         gentips(pattern, remaining, writePos + 1, unresolvedNumbers - 1)
@@ -102,7 +105,6 @@ function findTips(inputNumbers, targetNum) {
   rpns = [];
   targetsEz = [];
   targetsMed = [];
-  //no need for found here but let it be
   found = false;
   maxScore = 0;
   best = ""

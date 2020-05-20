@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="utf-8" />
+<title>Tangram Demo Activity</title>
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, viewport-fit=cover"/>
+<link rel="stylesheet" media="not screen and (device-width: 1200px) and (device-height: 900px)"
+	href="lib/sugar-web/graphics/css/sugar-96dpi.css">
+<link rel="stylesheet" media="screen and (device-width: 1200px) and (device-height: 900px)"
+	href="lib/sugar-web/graphics/css/sugar-200dpi.css">
+<link rel="stylesheet" href="css/activity.css">
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+<script src="lib/vue.min.js"></script>
+<script src="lib/jquery-3.3.1.slim.min.js"></script>
+<script src="lib/konva.min.js"></script>
+<script src="lib/vue-konva.min.js"></script>
+<script src="lib/helpers.js"></script>
+<script src="lib/intadjoinsqrt2.js"></script>
+<script src="lib/point.js"></script>
+<script src="lib/directions.js"></script>
+<script src="lib/lineSegement.js"></script>
+<script src="lib/evaluation.js"></script>
+<script src="lib/tan.js"></script>
+<script src="lib/tangram.js"></script>
+<script src="lib/generator.js"></script>
+
+<script>if (window.module) module = window.module;</script>
+<script src="lib/require.js"></script>
+</head>
+
+<body>
+	<div id="app">
+		<toolbar ref="toolbar"></toolbar>
+
+		<div id="canvas">
+			<tangramgame> </tangramgame>
+		</div>
+
+		<button class="toolbutton" id="unfullscreen-button" title="Unfullscreen"></button>
+	</div>
+
+	<script src="js/toolbar.js"></script>
+	<script src="js/tangramGame.js"></script>
+	<script src="js/activity.js"></script>
+</body>
+
+</html>
