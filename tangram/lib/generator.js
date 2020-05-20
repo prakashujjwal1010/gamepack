@@ -1,4 +1,4 @@
-//code from https://github.com/Wiebke/TangramGenerator 
+//code from https://github.com/Wiebke/TangramGenerator
 //Copyright (c) 2019 Wiebke Köpp
 
 /*importScripts("helpers.js", "intadjoinsqrt2.js", "point.js", "lineSegement.js",
@@ -131,7 +131,18 @@ var generateTangram = function () {
             }
         }
     }
-    return new Tangram(tans);
+    var ct = 0;
+    for (var i = 0; i < tans.length; i++) {
+      if (tans[i] != undefined) {
+        ct++;
+      }
+    }
+    if (ct == 7) {
+      return new Tangram(tans);
+    }
+    else {
+      return generateTangram();
+    }
 };
 
 /* Given an array of values, normalize the values so that sum of all values is 1*/
