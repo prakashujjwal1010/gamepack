@@ -1,2 +1,1 @@
-# SugarizerVueActivityTemplate
-template for vuejs activities
+# tangram demo
