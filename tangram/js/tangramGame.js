@@ -44,6 +44,7 @@ var TangramGame = {
   },
   methods : {
     generateEasyTangram: function () {
+      console.log("starting generation");
       var generated = []
       var tang = generateTangram();
       console.log(tang);
@@ -79,6 +80,7 @@ var TangramGame = {
       this.updateEasyOutlines();
     },
     generateTangram : function () {
+      console.log("starting generation");
       var generated = generateTangrams(1);
       console.log(generated);
       this.generated = generated;
