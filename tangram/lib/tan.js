@@ -1,4 +1,4 @@
-//code from https://github.com/Wiebke/TangramGenerator 
+//code from https://github.com/Wiebke/TangramGenerator
 //Copyright (c) 2019 Wiebke Köpp
 /** Class for a Tan */
 var areaSum = new IntAdjoinSqrt2(576, 0);

@@ -1,4 +1,4 @@
-//code from https://github.com/Wiebke/TangramGenerator 
+//code from https://github.com/Wiebke/TangramGenerator
 //Copyright (c) 2019 Wiebke Köpp
 /**
  * Definition of directions for each of the tans, the anchor point for each piece
@@ -15,6 +15,8 @@ var Directions = [];
 var InsideDirections = [];
 var SegmentDirections = [];
 var numOrientations = 8;
+var scale = 6;
+var init = 100;
 
 /* Create Array for each tan piece */
 for (var index = 0; index <= 5; index++) {
