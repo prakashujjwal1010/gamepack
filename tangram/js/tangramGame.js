@@ -11,6 +11,8 @@ var TangramGame = {
         <br></br>
         <button id="levelButton" name="levelButton" @click="changeLevel">Change Level</button>
         <br></br>
+        <button id="flipButton" name="flipButton" @click="flipPgram">flip parallelogram</button>
+        <br></br>
         <div v-if="standard!=null" >standard Tangram : {{standard}}</div>
         <div v-else >random Tangram</div>
 
@@ -20,7 +22,7 @@ var TangramGame = {
       </div>
       <div id="gameArea">
         <v-stage ref="stage" :config="configKonva">
-          <v-layer ref="layer">
+          <v-layer ref="layer" :config="configLayer" @mousemove="onMouseMove($event)">
             <v-line v-for="(targetOutline,index) in target" :key="index" :config="targetOutline"></v-line>
             <v-line v-if="level == 0" v-for="(easyOutline,index) in easyOutlines" :key="index" :config="easyOutline"></v-line>
             <v-line v-for="(tan,index) in tans" :key="index" :config="tan"
@@ -39,11 +41,15 @@ var TangramGame = {
         width: 700,
         height: 600,
       },
+      configLayer:{
+        scaleX: 6,
+        scaleY: 6
+      },
       level: 1,
       score:0,
+      flip:5,
       standard:null,
-      scaleX: 6,
-      scaleY: 6,
+      translateVal: 10,
       easyOutlines: [],
       target: [],
       tans: [],
@@ -74,13 +80,13 @@ var TangramGame = {
           points: [],
           stroke: "green",
           fill:"",
-          strokeWidth: 0.5,
+          strokeWidth: 0.2,
           closed: true,
         }
         var outline = [];
         for (var i = 0; i < tansOut[k].length; i++) {
-           outline.push((tansOut[k][i].toFloatX() + 0)*this.scaleX + 100);
-           outline.push((tansOut[k][i].toFloatY() + 0)*this.scaleY + 100);
+           outline.push((tansOut[k][i].toFloatX() + this.translateVal));
+           outline.push((tansOut[k][i].toFloatY() + this.translateVal));
         }
         if (k==0) {
           targetOutline.fill ="green";
@@ -112,13 +118,13 @@ var TangramGame = {
           points: [],
           stroke: "green",
           fill:"",
-          strokeWidth: 0.5,
+          strokeWidth: 0.2,
           closed: true,
         }
         var outline = [];
         for (var i = 0; i < tansOut[k].length; i++) {
-           outline.push((tansOut[k][i].toFloatX() + 0)*this.scaleX + 100);
-           outline.push((tansOut[k][i].toFloatY() + 0)*this.scaleY + 100);
+           outline.push((tansOut[k][i].toFloatX() + this.translateVal));
+           outline.push((tansOut[k][i].toFloatY() + this.translateVal));
         }
         if (k==0) {
           targetOutline.fill ="green";
@@ -142,19 +148,22 @@ var TangramGame = {
       this.generated = generated;
 
       var tansOut = computeOutline(generated[0].tans,true);
+
       var target = []
       for (var k = 0; k < tansOut.length; k++) {
         var targetOutline = {
           points: [],
           stroke: "green",
           fill:"",
-          strokeWidth: 0.5,
+          strokeWidth: 0.2,
           closed: true,
         }
         var outline = [];
         for (var i = 0; i < tansOut[k].length; i++) {
-           outline.push((tansOut[k][i].toFloatX() + 0)*this.scaleX + 100);
-           outline.push((tansOut[k][i].toFloatY() + 0)*this.scaleY + 100);
+           //outline.push((tansOut[k][i].toFloatX() + 0)*this.scaleX + 100);
+           //outline.push((tansOut[k][i].toFloatY() + 0)*this.scaleY + 100);
+           outline.push(tansOut[k][i].toFloatX() + this.translateVal);
+           outline.push(tansOut[k][i].toFloatY() + this.translateVal);
         }
         if (k==0) {
           targetOutline.fill ="green";
@@ -165,7 +174,6 @@ var TangramGame = {
 
         targetOutline.points = outline;
         target.push(targetOutline);
-        console.log(targetOutline);
       }
       this.target = target;
       this.updateEasyOutlines();
@@ -204,7 +212,7 @@ var TangramGame = {
           points: [],
           pointsObjs: [],
           stroke: "black",
-          strokeWidth: 0.5,
+          strokeWidth: 0.2,
           closed: true,
           draggable: true,
           fill:"blue",
@@ -215,18 +223,15 @@ var TangramGame = {
         var floatPoints = [];
         var pointsObjs = [];
         for (var j = 0; j < points.length; j++) {
-          points[j].x.multiply(new IntAdjoinSqrt2(this.scaleX,0));
-          points[j].x.add(new IntAdjoinSqrt2(100,0));
-          points[j].y.multiply(new IntAdjoinSqrt2(this.scaleY,0));
-          points[j].y.add(new IntAdjoinSqrt2(100,0));
+          points[j].x.add(new IntAdjoinSqrt2(this.translateVal,0));
+          points[j].y.add(new IntAdjoinSqrt2(this.translateVal,0));
           pointsObjs.push(points[j]);
           floatPoints.push((points[j].toFloatX() + 0));
           floatPoints.push((points[j].toFloatY() + 0));
         }
 
-
-        tan.offsetX = (center.toFloatX() + 0)*this.scaleX + 100;
-        tan.offsetY = (center.toFloatY() + 0)*this.scaleY + 100;
+        tan.offsetX = (center.toFloatX() + this.translateVal);
+        tan.offsetY = (center.toFloatY() + this.translateVal);
         tan.x =  tan.offsetX;
         tan.y =  tan.offsetY;
         tan.anchorX = floatPoints[0];
@@ -260,26 +265,24 @@ var TangramGame = {
             anchorY: 0,
             points: [],
             stroke: "black",
-            strokeWidth: 1,
+            strokeWidth: 0.5,
             closed: true,
-            dash :[2,1]
+            dash :[2,0]
           }
           var points = generated[0].tans[i].getPoints();
           var center = generated[0].tans[i].center();
           var floatPoints = [];
           var pointsObjs = [];
           for (var j = 0; j < points.length; j++) {
-            points[j].x.multiply(new IntAdjoinSqrt2(this.scaleX,0));
-            points[j].x.add(new IntAdjoinSqrt2(100,0));
-            points[j].y.multiply(new IntAdjoinSqrt2(this.scaleY,0));
-            points[j].y.add(new IntAdjoinSqrt2(100,0));
+            points[j].x.add(new IntAdjoinSqrt2(this.translateVal,0));
+            points[j].y.add(new IntAdjoinSqrt2(this.translateVal,0));
             pointsObjs.push(points[j]);
             floatPoints.push((points[j].toFloatX() + 0));
             floatPoints.push((points[j].toFloatY() + 0));
           }
 
-          easyTan.offsetX = (center.toFloatX() + 0)*this.scaleX + 100;
-          easyTan.offsetY = (center.toFloatY() + 0)*this.scaleY + 100;
+          easyTan.offsetX = (center.toFloatX() + this.translateVal);
+          easyTan.offsetY = (center.toFloatY() + this.translateVal);
           easyTan.x =  easyTan.offsetX;
           easyTan.y =  easyTan.offsetY;
           easyTan.anchorX = floatPoints[0];
@@ -290,7 +293,6 @@ var TangramGame = {
           easyTans.push(easyTan);
         }
         this.easyOutlines = easyTans;
-        console.log(this.easyOutlines);
       }
     },
     changeLevel: function () {
@@ -306,49 +308,31 @@ var TangramGame = {
       var y = currentTan.y;
       var tanPoints = currentTan.points;
 
-    /*  for (var i = 0; i < this.easyOutlines.length; i++) {
-        if(this.easyOutlines[i].tanType === currentTan.tanType){
+      var flag = false;
+      for (var i = 0; i < 7; i++) {
+        if (i == index) {
+          continue;
+        }
+        var checkTanPoints = this.tans[i].points;
+        var checkTanPointsObjs = this.tans[i].pointsObjs;
+        for (var j = 0; j < tanPoints.length; j+=2) {
+          var fl = false;
+          for (var k = 0; k < checkTanPoints.length; k+=2) {
+            if (Math.abs(tanPoints[j] - checkTanPoints[k]) <= 1.5 && Math.abs(tanPoints[j+1] - checkTanPoints[k+1]) <= 1.5) {
 
-          if(Math.abs(x - this.easyOutlines[i].x) <= 10 && Math.abs(y - this.easyOutlines[i].y) <= 10){
-            var correctOrientation = false;
+              var diff = this.tans[i].pointsObjs[k/2].dup().subtract(this.tans[index].pointsObjs[j/2]);
 
-            if (currentTan.tanType === 0 || currentTan.tanType === 1 || currentTan.tanType === 2) {
-              if (( currentTan.rotation + currentTan.orientation * 45 ) % 360 == (this.easyOutlines[i].orientation) * 45) {
-                correctOrientation = true;
-              }
-            }else if (currentTan.tanType === 3) {
-              if (( currentTan.rotation + currentTan.orientation * 45 ) % 90 == (this.easyOutlines[i].orientation % 2) * 45) {
-                correctOrientation = true;
-              }
-            }else if (currentTan.tanType === 4 || currentTan.tanType === 5) {
-              if (( currentTan.rotation + currentTan.orientation * 45 ) % 180 == (this.easyOutlines[i].orientation % 4) * 45) {
-                correctOrientation = true;
-              }
-            }
-            if (true) {
-              currentTan.x = this.easyOutlines[i].x;
-              currentTan.y = this.easyOutlines[i].y;
-              console.log("snapped");
+              var dx = diff.toFloatX();
+              var dy = diff.toFloatY();
+
+              //console.log(dx+" "+dy);
+              this.updatePointsObj(index, diff)
+              this.updatePointsIfMoved(index, dx, dy, true);
+
+              console.log("snapped tan " + index+ " tan to "+ i);
+              fl =true;
               break;
             }
-          }
-        }
-      }*/
-
-      for (var i = 0; i < tanPoints.length; i+=2) {
-        var flag = false;
-        for (var easyTan = 0; easyTan < this.easyOutlines.length; easyTan++) {
-          var fl = false;
-          for(var j=0;j<this.easyOutlines[easyTan].points.length;j+=2)
-          if (Math.abs(tanPoints[i] - this.easyOutlines[easyTan].points[j]) <= 5 && Math.abs(tanPoints[i+1] - this.easyOutlines[easyTan].points[j+1]) <= 5) {
-            var dx = this.easyOutlines[easyTan].points[j] - tanPoints[i];
-            var dy = this.easyOutlines[easyTan].points[j+1] - tanPoints[i+1];
-
-
-            this.updatePointsIfMoved(index, dx, dy);
-            console.log("snapped");
-            fl =true;
-            break;
           }
           if (fl) {
             flag = true;
@@ -360,27 +344,114 @@ var TangramGame = {
         }
       }
 
+      if (!flag) {
+        for (var i = 0; i < tanPoints.length; i+=2) {
+
+          for (var easyTan = 0; easyTan < this.easyOutlines.length; easyTan++) {
+            var fl = false;
+            for(var j=0;j<this.easyOutlines[easyTan].points.length;j+=2)
+            if (Math.abs(tanPoints[i] - this.easyOutlines[easyTan].points[j]) <= 1.5 && Math.abs(tanPoints[i+1] - this.easyOutlines[easyTan].points[j+1]) <= 1.5) {
+
+              var diff = this.easyOutlines[easyTan].pointsObjs[j/2].dup().subtract(this.tans[index].pointsObjs[i/2]);
+
+              var dx = diff.toFloatX();
+              var dy = diff.toFloatY();
+
+              //console.log(dx+" "+dy);
+              this.updatePointsObj(index, diff)
+              this.updatePointsIfMoved(index, dx, dy, true);
+
+              console.log("snapped");
+              fl =true;
+              break;
+            }
+            if (fl) {
+              flag = true;
+              break;
+            }
+          }
+          if (flag) {
+            break;
+          }
+        }
+      }
       /*var p1 = [];
       var p2 = [];
       for (var i = 0; i < this.tans.length; i++) {
-        for (var j = 0; j < this.tans[i].points.length; j++) {
-          p1.push(this.tans[i].points[j]);
+        for (var j = 0; j < this.tans[i].pointsObjs.length; j++) {
+          p1.push(this.tans[i].pointsObjs[j].toFloatX());
+          p1.push(this.tans[i].pointsObjs[j].toFloatY());
+
         }
       }
       for (var i = 0; i < this.easyOutlines.length; i++) {
-        for (var j = 0; j < this.easyOutlines[i].points.length; j++) {
-          p2.push(this.easyOutlines[i].points[j]);
+        for (var j = 0; j < this.easyOutlines[i].pointsObjs.length; j++) {
+        //  p2.push(this.easyOutlines[i].points[j]);
+          p2.push(this.easyOutlines[i].pointsObjs[j].toFloatX());
+          p2.push(this.easyOutlines[i].pointsObjs[j].toFloatY());
         }
       }
       p1.sort();
       p2.sort();
-      console.log(p1);
-      console.log(p2);*/
+      //console.log(p1);
+      //console.log(p2);
+      var res = 0;
+      for (var i = 0; i < p1.length; i++) {
+        if(Math.abs(p1[i] - p2[i]) <= 0.5){
+          res++;
+        }
+        else{
+          res--;
+        }
+      }
+      console.log(arrayEq(p1,p2,function (a, b) {
+        return a - b;
+      }));
+      console.log(res);
+      */
       this.tans[index] = currentTan;
     },
+    comparePoints: function (index) {
+      var p1 = [];
+      var p2 = [];
+        for (var j = 0; j < this.tans[index].pointsObjs.length; j++) {
+          p1.push(this.tans[index].pointsObjs[j].toFloatX());
+          p1.push(this.tans[index].pointsObjs[j].toFloatY());
+
+        }
+
+        for (var j = 0; j < this.easyOutlines[index].pointsObjs.length; j++) {
+          p2.push(this.easyOutlines[index].pointsObjs[j].toFloatX());
+          p2.push(this.easyOutlines[index].pointsObjs[j].toFloatY());
+        }
+      p1.sort();
+      p2.sort();
+      console.log(p1);
+      console.log(p2);
+      var res = 0;
+      for (var i = 0; i < p1.length; i++) {
+        if(Math.abs(p1[i] - p2[i]) <= 0.5){
+          res++;
+        }
+        else{
+          res--;
+        }
+      }
+      console.log(arrayEq(p1,p2,function (a, b) {
+        return a - b;
+      }));
+      console.log(res);
+    },
     checkIfSolved: function () {
-      /*var targetPoints = this.target[0].points;
+      var targetPoints = [];
+      for (var i = 0; i < this.target.length; i++) {
+        for (var j = 0; j < this.target[i].points.length; j++) {
+          targetPoints.push(this.target[i].points[j]);
+        }
+      }
+
       var tans = [];
+      var score=0;
 
       for (var i = 0; i < this.tans.length; i++) {
       //  var anchor = new Point(new IntAdjoinSqrt2((this.tans[i].anchorX-100)/this.scaleX, 0), new IntAdjoinSqrt2((this.tans[i].anchorY-100)/this.scaleY, 0));
@@ -388,78 +459,67 @@ var TangramGame = {
         tans.push(tan);
       }
 
-      squaTangram = new Tangram([tans[0], tans[1], tans[2], tans[3], tans[4], tans[5], tans[6]]);
-      console.log(computeOutline(squaTangram.tans,true));
       var currentOut = computeOutline(tans,true);
-
       console.log(currentOut);
       var currentPoints = [];
-      if (typeof currentPoints === 'undefined'
-        || targetPoints.length != currentPoints.length) {
-        return false;
+      // TODO: check their length also...
+      if (typeof currentOut === 'undefined'){
+        console.log("invalid");
       }
-      for (var k = 0; k < currentOut.length; k++) {
-        for (var i = 0; i < currentOut[k].length; i++) {
-           currentPoints.push((currentOut[k][i].toFloatX() + 0)*this.scaleX + 100);
-         }
-           currentPoints.push((currentOut[k][i].toFloatY() + 0)*this.scaleY + 100);
-      }
-      function compareFunc(a, b) {
-        return a - b;
-      }
+      else {
+        for (var k = 0; k < currentOut.length; k++) {
+          for (var i = 0; i < currentOut[k].length; i++) {
+             currentPoints.push((currentOut[k][i].toFloatX() + 0));
+             currentPoints.push((currentOut[k][i].toFloatY() + 0));
+           }
 
-      var solved = arrayEq(targetPoints, currentPoints, compareFunc);
-      console.log(currentPoints.sort());
-      console.log(targetPoints.sort());
-      if (solved) {
+        }
+        function compareFunc(a, b) {
+          return a - b;
+        }
 
+        var solved = arrayEq(targetPoints, currentPoints, compareFunc);
         console.log(solved);
-      }
-      return solved;
-      */
-      var score=0;
-      for (var index = 0; index < this.tans.length; index++) {
-        var currentTan = this.tans[index];
-        var x = currentTan.x;
-        var y = currentTan.y;
-        for (var i = 0; i < this.easyOutlines.length; i++) {
-          if (this.easyOutlines[i].tanType === currentTan.tanType) {
-
-            if (Math.abs(x - this.easyOutlines[i].x) <= 1 && Math.abs(y - this.easyOutlines[i].y) <= 1) {
-              var correctOrientation = false;
-
-              if (currentTan.tanType === 0 || currentTan.tanType === 1 || currentTan.tanType === 2) {
-                if ((currentTan.rotation + currentTan.orientation * 45) % 360 == (this.easyOutlines[i].orientation) * 45) {
-                  correctOrientation = true;
-                }
-              } else if (currentTan.tanType === 3) {
-                if ((currentTan.rotation + currentTan.orientation * 45) % 90 == (this.easyOutlines[i].orientation % 2) * 45) {
-                  correctOrientation = true;
-                }
-              } else if (currentTan.tanType === 4 || currentTan.tanType === 5) {
-                if ((currentTan.rotation + currentTan.orientation * 45) % 180 == (this.easyOutlines[i].orientation % 4) * 45) {
-                  correctOrientation = true;
-                }
-              }
-              if (correctOrientation) {
-                score++;
-                break;
-              }
-            }
+        var res = 0;
+        currentPoints.sort();
+        targetPoints.sort();
+        //console.log(currentPoints);
+        //console.log(targetPoints);
+        for (var i = 0; i < targetPoints.length; i++) {
+          if(Math.abs(targetPoints[i] - currentPoints[i]) <= 0.5){
+            res++;
+          }
+          else{
+            res--;
           }
         }
+        console.log(res);
+        if (res == currentPoints.length) {
+          score = 7
+        }
+
+
       }
 
       this.score = score;
 
     },
-    updatePointsIfMoved: function (index, dx, dy) {
+    updatePointsObj: function (index, diff) {
+      console.log(diff.toFloatX() +"  "+diff.toFloatY());
+      for (var i = 0; i < this.tans[index].pointsObjs.length; i++) {
+        this.tans[index].pointsObjs[i].add(diff);
+      }
+    },
+    updatePointsIfMoved: function (index, dx, dy,special) {
       var tan = new Tan(this.tans[index].tanType, this.tans[index].pointsObjs[0], this.tans[index].orientation);
       tana = tan;
       var points = []
+
       for (var i = 0; i < this.tans[index].points.length; i+=2) {
-        this.tans[index].pointsObjs[i/2].x.add(new IntAdjoinSqrt2(dx,0));
-        this.tans[index].pointsObjs[i/2].y.add(new IntAdjoinSqrt2(dy,0));
+        if (!special) {
+          this.tans[index].pointsObjs[i/2].x.add(new IntAdjoinSqrt2(dx,0));
+          this.tans[index].pointsObjs[i/2].y.add(new IntAdjoinSqrt2(dy,0));
+        }
         points.push(this.tans[index].points[i] + dx);
         points.push(this.tans[index].points[i+1] + dy);
       }
@@ -483,8 +543,8 @@ var TangramGame = {
         var x1 = this.tans[index].points[i];
         var y1 = this.tans[index].points[i+1];
         var pt = new Point(new IntAdjoinSqrt2(x1, 0), new IntAdjoinSqrt2(y1, 0))
+        this.tans[index].pointsObjs[i/2].subtract(tanCenter).rotate(45* inc).add(tanCenter);
         pt.subtract(tanCenter).rotate(45 * inc).add(tanCenter);
-        this.tans[index].pointsObjs[i/2].subtract(tan.center()).rotate(45* inc).add(tan.center());
         points.push(pt.toFloatX());
         points.push(pt.toFloatY());
       }
@@ -497,8 +557,75 @@ var TangramGame = {
     updateRotation: function (index, inc) {
       this.updatePointsIfRotated(index, 1);
       this.tans[index].orientation = (this.tans[index].orientation + inc) % 8;
+      this.snap(index);
+      this.checkIfSolved();
       //this.tans[index].rotation = (this.tans[index].rotation + 45 * inc) % 360;
 
+    },
+    flipPgram: function () {
+      var cx;
+      var cy;
+      var index = 6;
+      var points = [];
+      for (var i = 0; i < this.tans.length; i++) {
+        if (this.tans[i].tanType == this.flip) {
+          index = i;
+          break;
+        }
+      }
+      var cenx = this.tans[index].x;
+      var ceny = this.tans[index].y;
+      this.tans[index].tanType = this.flip == 4 ? 5: 4;
+      this.tans[index].orientation = 0;
+
+      var cen = new Point(new IntAdjoinSqrt2(cenx, 0), new IntAdjoinSqrt2(ceny, 0));
+      var anchor = cen.dup();
+      var sub = InsideDirections[this.tans[index].tanType][this.tans[index].orientation][0];
+      var dx = cen.toFloatX() - sub.toFloatX();
+      var dy = cen.toFloatY() - sub.toFloatY();
+
+      anchor.x.subtract(new IntAdjoinSqrt2(sub.toFloatX() ,0));
+      anchor.y.subtract(new IntAdjoinSqrt2(sub.toFloatY() ,0));
+
+
+      //cx = this.tans[index].points[0];
+      //cy = this.tans[index].points[1];
+      //var anchor = new Point(new IntAdjoinSqrt2(cx, 0), new IntAdjoinSqrt2(cy, 0));
+
+      var flipTan = new Tan(this.tans[index].tanType, anchor, this.tans[index].orientation);
+      console.log(anchor);
+
+      var points = flipTan.getPoints();
+      var center = flipTan.center();
+      var floatPoints = [];
+      var pointsObjs = [];
+
+      for (var j = 0; j < points.length; j++) {
+        /*points[j].x.multiply(new IntAdjoinSqrt2(this.scaleX,0));
+        points[j].x.add(new IntAdjoinSqrt2(100,0));
+        points[j].y.multiply(new IntAdjoinSqrt2(this.scaleY,0));
+        points[j].y.add(new IntAdjoinSqrt2(100,0));*/
+
+      /*dx = flipTan.anchor.toFloatX() - points[j].toFloatX() ;
+        dy = flipTan.anchor.toFloatY()- points[j].toFloatY();
+
+        points[j].x.add(new IntAdjoinSqrt2(dx  + 0,0));
+        points[j].y.add(new IntAdjoinSqrt2(dy + 0,0));*/
+
+        pointsObjs.push(points[j]);
+        floatPoints.push((points[j].toFloatX() + 0));
+        floatPoints.push((points[j].toFloatY() + 0));
+      }
+      console.log(floatPoints);
+      this.tans[index].offsetX = cenx ;
+      this.tans[index].offsetY = ceny ;
+      this.tans[index].x =  this.tans[index].offsetX;
+      this.tans[index].y =  this.tans[index].offsetY;
+      this.tans[index].points = floatPoints;
+      this.tans[index].pointsObjs = pointsObjs;
+      this.tans[index].anchorX = floatPoints[0];
+      this.tans[index].anchorY = floatPoints[1];
+      this.flip = this.flip == 4? 5: 4;
     },
     onDragEnd: function(e, index) {
       var dx = e.target.attrs.x - this.tans[index].x;
@@ -513,7 +640,7 @@ var TangramGame = {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x ;
       const y = mousePos.y ;
-      console.log(x + " "+ y);
+      //console.log(x + " "+ y);
     },
     onTap: function (e, index) {
       this.updateRotation(index, 1);

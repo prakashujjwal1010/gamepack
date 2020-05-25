@@ -37,6 +37,11 @@ var app = new Vue({
 		document.getElementById("unfullscreen-button").addEventListener('click', function() {
 			vm.unfullscreen();
 		});
+		window.addEventListener('resize', function () {
+			vm.$refs.tangramgame.configKonva.width = window.innerWidth * 0.7;
+			vm.$refs.tangramgame.configKonva.height = window.innerHeight * 0.9;
+
+		})
 	},
 
 	updated: function() {

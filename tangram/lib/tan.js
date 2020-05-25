@@ -301,6 +301,7 @@ var computeOutline = function (tans, reduce) {
         allSegments = outlinePart[1];
         area.subtract(outlineArea(outline[outlineId]));
     }
+
     return outline;
 };
 
