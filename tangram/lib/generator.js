@@ -10,6 +10,74 @@ var range = new IntAdjoinSqrt2(50, 0);
  * align */
 var increaseProbability = 50;
 
+var checkNewTanInSettingMode = function (currentTans, newTan) {
+    /* For each point of the new piece, check if it overlaps with already placed
+     * tans */
+    var points = newTan.getPoints();
+    /* Use inside points to detect exact alignment of one piece in another */
+    var allTanPoints = points.concat(newTan.getInsidePoints());
+    for (var tansId = 0; tansId < currentTans.length; tansId++) {
+        var currentPoints = currentTans[tansId].getPoints();
+        var onSegmentCounter = 0;
+        for (var pointId = 0; pointId < allTanPoints.length; pointId++) {
+            var contains = containsPoint(currentPoints, allTanPoints[pointId]);
+            if (contains === 1) {
+              console.log("no");
+                return false;
+            } else if (contains === 0) {
+                onSegmentCounter++;
+            }
+        }
+        /* If more than 3 points of the new tan lie on one of the already placed
+         * tans, there must be an overlap */
+        if (onSegmentCounter >= 3) {
+          console.log("no");
+            return false;
+        }
+        /* Apply the same check the other way around: and already placed piece
+         * lies inside the new piece */
+        onSegmentCounter = 0;
+        currentPoints = currentPoints.concat(currentTans[tansId].getInsidePoints());
+        for (pointId = 0; pointId < currentPoints.length; pointId++) {
+            contains = containsPoint(points, currentPoints[pointId]);
+            if (contains === 1) {
+              console.log("no");
+                return false;
+            } else if (contains === 0) {
+                onSegmentCounter++;
+            }
+        }
+        if (onSegmentCounter >= 3) {
+          console.log("no");
+            return false;
+        }
+    }
+    /* Check if any of the segments of the already placed tans  is intersected
+     * by any of the line segments of the new tan */
+    var tanSegments = newTan.getSegments();
+    for (var segmentId = 0; segmentId < tanSegments.length; segmentId++) {
+        for (tansId = 0; tansId < currentTans.length; tansId++) {
+            var otherSegments = currentTans[tansId].getSegments();
+            for (var otherSegmentsId = 0; otherSegmentsId < otherSegments.length; otherSegmentsId++) {
+                if (tanSegments[segmentId].intersects(otherSegments[otherSegmentsId])) {
+                  console.log("no");
+                    return false;
+                }
+            }
+        }
+    }
+    /* Check if placement of newTan results in a tangram with a to large range
+     * assuming that tangrams with a too large range are not interesting */
+    /*var newTans = currentTans.slice(0);
+    newTans[currentTans.length] = newTan;
+    var boundingBox = computeBoundingBox(newTans);
+    if (boundingBox[2].dup().subtract(boundingBox[0]).compare(range) > 0
+        || boundingBox[3].dup().subtract(boundingBox[1]).compare(range) > 0) {
+        return false;
+    }*/
+    return true;
+};
+
 var checkNewTan = function (currentTans, newTan) {
     /* For each point of the new piece, check if it overlaps with already placed
      * tans */
@@ -22,6 +90,7 @@ var checkNewTan = function (currentTans, newTan) {
         for (var pointId = 0; pointId < allTanPoints.length; pointId++) {
             var contains = containsPoint(currentPoints, allTanPoints[pointId]);
             if (contains === 1) {
+              console.log("no");
                 return false;
             } else if (contains === 0) {
                 onSegmentCounter++;
@@ -30,6 +99,7 @@ var checkNewTan = function (currentTans, newTan) {
         /* If more than 3 points of the new tan lie on one of the already placed
          * tans, there must be an overlap */
         if (onSegmentCounter >= 3) {
+          console.log("no");
             return false;
         }
         /* Apply the same check the other way around: and already placed piece
@@ -39,12 +109,14 @@ var checkNewTan = function (currentTans, newTan) {
         for (pointId = 0; pointId < currentPoints.length; pointId++) {
             contains = containsPoint(points, currentPoints[pointId]);
             if (contains === 1) {
+              console.log("no");
                 return false;
             } else if (contains === 0) {
                 onSegmentCounter++;
             }
         }
         if (onSegmentCounter >= 3) {
+          console.log("no");
             return false;
         }
     }
@@ -56,6 +128,7 @@ var checkNewTan = function (currentTans, newTan) {
             var otherSegments = currentTans[tansId].getSegments();
             for (var otherSegmentsId = 0; otherSegmentsId < otherSegments.length; otherSegmentsId++) {
                 if (tanSegments[segmentId].intersects(otherSegments[otherSegmentsId])) {
+                  console.log("no");
                     return false;
                 }
             }

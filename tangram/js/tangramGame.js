@@ -3,22 +3,34 @@ var TangramGame = {
   template: `
     <div id="tangram-game">
       <div id="generateContainer">
-        <button id="genTangramButton" name="genTangramButton" @click="generateTangram">Generate Tangram</button>
+        <button id="switchModeButton" name="switchModeButton" @click="switchMode">Switch Mode</button>
         <br></br>
-        <button id="genEasyTangramButton" name="genEasyTangramButton" @click="generateEasyTangram">Generate Easy Tangram</button>
-        <br></br>
-        <button id="genStandardTangramButton" name="genStandardTangramButton" @click="generateStandardTangram">Generate standard Tangram</button>
-        <br></br>
-        <button id="levelButton" name="levelButton" @click="changeLevel">Change Level</button>
+        <div v-if="!settingMode">
+          <button id="genTangramButton" name="genTangramButton" @click="generateTangram">Generate Tangram</button>
+          <br></br>
+          <button id="genEasyTangramButton" name="genEasyTangramButton" @click="generateEasyTangram">Generate Easy Tangram</button>
+          <br></br>
+          <button id="genStandardTangramButton" name="genStandardTangramButton" @click="generateStandardTangram">Generate standard Tangram</button>
+          <br></br>
+          <button id="generateCustomTangramButton" name="generateCustomTangramButton" @click="generateCustomTangram">Generate Custom Tangram  Avaiable</button>
+          <br></br>
+          <button id="levelButton" name="levelButton" @click="changeLevel">Change Level</button>
+          <br></br>
+          <div v-if="standard!=null" >standard Tangram : {{standard}}</div>
+          <div v-else >random Tangram</div>
+          <br></br>
+          <div v-if="score==7">puzzle solved!!!!!</div>
+        </div>
+        <div v-else>
+          <button id="addShapeButton" name="addShapeButton" @click="addShape">create and add shapee</button>
+          <br></br>
+          <div>JOIN THE TANS TO FORM A VALID SHAPE. <br></br> A VALID SHAPE WOULD BE THE ONE WHICH HAS NON-OVERLAPPED CONNECTED TANS WHERE EACH TAN IS CONNECTED TO ATLEAST ONE TAN BY ATLEAST ONE VERTICE </div>
+          <br></br>
+          <div> {{settingFlags}} </div>
+        </div>
         <br></br>
         <button id="flipButton" name="flipButton" @click="flipPgram">flip parallelogram</button>
         <br></br>
-        <div v-if="standard!=null" >standard Tangram : {{standard}}</div>
-        <div v-else >random Tangram</div>
-
-        <br></br>
-        <div v-if="score==7">puzzle solved!!!!!</div>
-
       </div>
       <div id="gameArea">
         <v-stage ref="stage" :config="configKonva">
@@ -46,6 +58,7 @@ var TangramGame = {
         scaleY: 6
       },
       level: 1,
+      settingMode:false,
       score:0,
       flip:5,
       standard:null,
@@ -54,6 +67,8 @@ var TangramGame = {
       target: [],
       tans: [],
       generated: null,
+      created: [],
+      settingFlags: "",
     };
   },
   mounted: function () {
@@ -65,6 +80,49 @@ var TangramGame = {
       console.log("starting generation");
       this.score = 0;
       var ele = standardTangrams[Math.floor(Math.random()*standardTangrams.length)];
+      this.standard = ele.name;
+      var tang = ele.tangram;
+      var generated = []
+      console.log(tang);
+      console.log(this.standard);
+      generated.push(tang);
+      this.generated = generated;
+
+      var tansOut = computeOutline(generated[0].tans,true);
+      var target = []
+      for (var k = 0; k < tansOut.length; k++) {
+        var targetOutline = {
+          points: [],
+          stroke: "green",
+          fill:"",
+          strokeWidth: 0.2,
+          closed: true,
+        }
+        var outline = [];
+        for (var i = 0; i < tansOut[k].length; i++) {
+           outline.push((tansOut[k][i].toFloatX() + this.translateVal));
+           outline.push((tansOut[k][i].toFloatY() + this.translateVal));
+        }
+        if (k==0) {
+          targetOutline.fill ="green";
+        }
+        else{
+          targetOutline.fill ="#c0c0c0";
+        }
+
+        targetOutline.points = outline;
+        target.push(targetOutline);
+      }
+      this.target = target;
+      this.updateEasyOutlines();
+    },
+    generateCustomTangram: function () {
+      if (this.created.length==0) {
+        return;
+      }
+      console.log("starting generation");
+      this.score = 0;
+      var ele = this.created[Math.floor(Math.random()*this.created.length)];
       this.standard = ele.name;
       var tang = ele.tangram;
       var generated = []
@@ -442,6 +500,51 @@ var TangramGame = {
       }));
       console.log(res);
     },
+    addShape: function () {
+      var res = this.createShape();
+      if (res!=undefined) {
+        var obj = {
+          name: 'tangram #' +this.created.length,
+          tangram: res
+        }
+        this.created.push(obj);
+        this.settingFlags = "Tangram created and added !!";
+      }
+      else{
+        console.log("invalid shape");
+        this.settingFlags = "Invalid Shape !!";
+      }
+    },
+    createShape: function () {
+      var tans = [];
+      var currentTan;
+      var index = Math.floor(Math.random()*7);
+      for (var i = 0; i < this.tans.length; i++) {
+        var tan = new Tan(this.tans[i].tanType, this.tans[i].pointsObjs[0], this.tans[i].orientation);
+        if (i!=index) {
+          tans.push(tan);
+        }
+        else {
+          currentTan = tan;
+        }
+      }
+      console.log(tans);
+
+      var tangramFromPieces = new Tangram([...tans,currentTan]);
+      console.log(tangramFromPieces);
+
+      if (tangramFromPieces.outline == undefined) {
+        return;
+      }
+      var res = checkNewTanInSettingMode(tans, currentTan);
+      console.log(res);
+      if (res) {
+        //standardTangrams = [{name:'tangramFromPieces', tangram:tangramFromPieces}];
+        return tangramFromPieces;
+      }
+
+      return;
+    },
     checkIfSolved: function () {
       var targetPoints = [];
       for (var i = 0; i < this.target.length; i++) {
@@ -627,6 +730,19 @@ var TangramGame = {
       this.tans[index].anchorY = floatPoints[1];
       this.flip = this.flip == 4? 5: 4;
     },
+    switchMode: function () {
+      if (this.settingMode) {
+        this.generateTangram();
+      }
+      else {
+        this.generated = null;
+        this.easyOutlines = [];
+        this.target = [];
+        this.score = 0;
+      }
+      this.settingMode = !this.settingMode;
+      this.settingFlags = "";
+    },
     onDragEnd: function(e, index) {
       var dx = e.target.attrs.x - this.tans[index].x;
       var dy = e.target.attrs.y - this.tans[index].y;
@@ -635,6 +751,9 @@ var TangramGame = {
 
       this.snap(index);
       this.checkIfSolved();
+      //if (this.settingMode) {
+        //this.createShape(index);
+      //}
     },
     onMouseMove: function (e, index) {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
@@ -644,9 +763,11 @@ var TangramGame = {
     },
     onTap: function (e, index) {
       this.updateRotation(index, 1);
+
     },
     onClick: function (e, index) {
       this.updateRotation(index, 1);
+
     }
   },
 }
