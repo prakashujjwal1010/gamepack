@@ -88,7 +88,7 @@ var TangramGame = {
       generated.push(tang);
       this.generated = generated;
 
-      var tansOut = computeOutline(generated[0].tans,true);
+      var tansOut = computeOutline(this.generated[0].tans,true);
       var target = []
       for (var k = 0; k < tansOut.length; k++) {
         var targetOutline = {
@@ -117,21 +117,29 @@ var TangramGame = {
       this.updateEasyOutlines();
     },
     generateCustomTangram: function () {
-      if (this.created.length==0) {
+      const len = this.created.length;
+      console.log(len);
+      if (len==0) {
         return;
       }
       console.log("starting generation");
       this.score = 0;
-      var ele = this.created[Math.floor(Math.random()*this.created.length)];
+      var index = Math.floor(Math.random()*len);
+      console.log(index);
+      var ele = this.created[index];
       this.standard = ele.name;
       var tang = ele.tangram;
       var generated = []
-      console.log(tang);
-      console.log(this.standard);
-      generated.push(tang);
+      /*var tans = [];
+      for (var i = 0; i < tang.tans.length; i++) {
+        var tan = new Tan(tang.tans[i].)
+      }*/
+      generated = [tang];
       this.generated = generated;
 
       var tansOut = computeOutline(generated[0].tans,true);
+      console.log(tansOut);
+
       var target = []
       for (var k = 0; k < tansOut.length; k++) {
         var targetOutline = {
@@ -249,8 +257,8 @@ var TangramGame = {
       var smallTriangle2 = new Tan(2, anchorST2, 5);
       var anchorS = new Point(new IntAdjoinSqrt2(0, 0), new IntAdjoinSqrt2(12, 0));
       var square = new Tan(3, anchorS, 7);
-      var anchorP = new Point(new IntAdjoinSqrt2(24, 0), new IntAdjoinSqrt2(0, 0));
-      var parallelogram = new Tan(5, anchorP, 4);
+      var anchorP = new Point(new IntAdjoinSqrt2(6, 0), new IntAdjoinSqrt2(6, 0));
+      var parallelogram = new Tan(5, anchorP, 0);
 
       var squareTangram = new Tangram([bigTriangle1, bigTriangle2, mediumTriangle, smallTriangle1, smallTriangle2, square, parallelogram]);
       //console.log(computeOutline(squareTangram.tans,true));
@@ -502,25 +510,31 @@ var TangramGame = {
     },
     addShape: function () {
       var res = this.createShape();
+      var created = [...this.created];
       if (res!=undefined) {
         var obj = {
-          name: 'tangram #' +this.created.length,
+          name: 'tangram #' + this.created.length,
           tangram: res
         }
-        this.created.push(obj);
+        console.log(obj);
+        created.push(obj);
         this.settingFlags = "Tangram created and added !!";
       }
       else{
         console.log("invalid shape");
         this.settingFlags = "Invalid Shape !!";
       }
+      this.created = created;
     },
     createShape: function () {
       var tans = [];
       var currentTan;
+      var stateTans = [... this.tans]
       var index = Math.floor(Math.random()*7);
-      for (var i = 0; i < this.tans.length; i++) {
-        var tan = new Tan(this.tans[i].tanType, this.tans[i].pointsObjs[0], this.tans[i].orientation);
+      for (var i = 0; i < stateTans.length; i++) {
+        console.log(this.tans[i].pointsObjs[0]);
+        var anchor = this.tans[i].pointsObjs[0].dup();
+        var tan = new Tan(this.tans[i].tanType, anchor, this.tans[i].orientation);
         if (i!=index) {
           tans.push(tan);
         }
@@ -557,7 +571,6 @@ var TangramGame = {
       var score=0;
 
       for (var i = 0; i < this.tans.length; i++) {
-      //  var anchor = new Point(new IntAdjoinSqrt2((this.tans[i].anchorX-100)/this.scaleX, 0), new IntAdjoinSqrt2((this.tans[i].anchorY-100)/this.scaleY, 0));
         var tan = new Tan(this.tans[i].tanType, this.tans[i].pointsObjs[0], this.tans[i].orientation);
         tans.push(tan);
       }
@@ -614,10 +627,7 @@ var TangramGame = {
       }
     },
     updatePointsIfMoved: function (index, dx, dy,special) {
-      var tan = new Tan(this.tans[index].tanType, this.tans[index].pointsObjs[0], this.tans[index].orientation);
-      tana = tan;
       var points = []
-
       for (var i = 0; i < this.tans[index].points.length; i+=2) {
         if (!special) {
           this.tans[index].pointsObjs[i/2].x.add(new IntAdjoinSqrt2(dx,0));
@@ -658,11 +668,15 @@ var TangramGame = {
     },
 
     updateRotation: function (index, inc) {
-      this.updatePointsIfRotated(index, 1);
-      this.tans[index].orientation = (this.tans[index].orientation + inc) % 8;
+      if (this.tans[index].tanType == this.flip && this.tans[index].orientation==3) {
+        this.flipPgram();
+      }
+      else {
+        this.updatePointsIfRotated(index, 1);
+        this.tans[index].orientation = (this.tans[index].orientation + inc) % 8;
+      }
       this.snap(index);
       this.checkIfSolved();
-      //this.tans[index].rotation = (this.tans[index].rotation + 45 * inc) % 360;
 
     },
     flipPgram: function () {
@@ -690,11 +704,6 @@ var TangramGame = {
       anchor.x.subtract(new IntAdjoinSqrt2(sub.toFloatX() ,0));
       anchor.y.subtract(new IntAdjoinSqrt2(sub.toFloatY() ,0));
 
-
-      //cx = this.tans[index].points[0];
-      //cy = this.tans[index].points[1];
-      //var anchor = new Point(new IntAdjoinSqrt2(cx, 0), new IntAdjoinSqrt2(cy, 0));
-
       var flipTan = new Tan(this.tans[index].tanType, anchor, this.tans[index].orientation);
       console.log(anchor);
 
@@ -704,22 +713,12 @@ var TangramGame = {
       var pointsObjs = [];
 
       for (var j = 0; j < points.length; j++) {
-        /*points[j].x.multiply(new IntAdjoinSqrt2(this.scaleX,0));
-        points[j].x.add(new IntAdjoinSqrt2(100,0));
-        points[j].y.multiply(new IntAdjoinSqrt2(this.scaleY,0));
-        points[j].y.add(new IntAdjoinSqrt2(100,0));*/
-
-      /*dx = flipTan.anchor.toFloatX() - points[j].toFloatX() ;
-        dy = flipTan.anchor.toFloatY()- points[j].toFloatY();
-
-        points[j].x.add(new IntAdjoinSqrt2(dx  + 0,0));
-        points[j].y.add(new IntAdjoinSqrt2(dy + 0,0));*/
 
         pointsObjs.push(points[j]);
         floatPoints.push((points[j].toFloatX() + 0));
         floatPoints.push((points[j].toFloatY() + 0));
       }
-      console.log(floatPoints);
+
       this.tans[index].offsetX = cenx ;
       this.tans[index].offsetY = ceny ;
       this.tans[index].x =  this.tans[index].offsetX;
@@ -746,14 +745,9 @@ var TangramGame = {
     onDragEnd: function(e, index) {
       var dx = e.target.attrs.x - this.tans[index].x;
       var dy = e.target.attrs.y - this.tans[index].y;
-
-      this.updatePointsIfMoved(index, dx, dy);
-
+      this.updatePointsIfMoved(index, dx, dy,false);
       this.snap(index);
       this.checkIfSolved();
-      //if (this.settingMode) {
-        //this.createShape(index);
-      //}
     },
     onMouseMove: function (e, index) {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
