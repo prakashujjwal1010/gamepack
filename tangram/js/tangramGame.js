@@ -69,6 +69,7 @@ var TangramGame = {
       generated: null,
       created: [],
       settingFlags: "",
+      tanColors: ["blue","purple","red","violet","#f57627","yellow"]
     };
   },
   mounted: function () {
@@ -306,6 +307,7 @@ var TangramGame = {
         tan.points = floatPoints;
         tan.pointsObjs = pointsObjs;
         tan.tan = squareTangram.tans[i];
+        tan.fill = this.tanColors[tan.tanType];
 
         tans.push(tan);
       }
@@ -727,6 +729,8 @@ var TangramGame = {
       this.tans[index].pointsObjs = pointsObjs;
       this.tans[index].anchorX = floatPoints[0];
       this.tans[index].anchorY = floatPoints[1];
+      this.tans[index].fill = this.tanColors[this.tans[index].tanType];
+
       this.flip = this.flip == 4? 5: 4;
     },
     switchMode: function () {
